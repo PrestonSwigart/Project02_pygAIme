@@ -79,6 +79,7 @@ state = player_frame_1
 crashed = False
 lock = False
 score = 0
+tscore = 0
 bg = (0, 150)
 bg1 = (600,150)
 start = False
@@ -199,7 +200,8 @@ while not crashed:
             state = player_frame_4
     pygame.display.update()
     clock.tick(120)
-    if start and not crashed:
+    tscore += 1
+    if start and not crashed and tscore % 12 == 0:
         score += 1
     if crashed:
         print(score)
