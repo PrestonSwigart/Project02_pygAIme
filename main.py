@@ -67,8 +67,8 @@ while Running:
     #this should reset the game
     score = int(frameCounter/12)
     if(crashed):
-        if(score > maxScore):
-            print(score)
+        if(score > maxScore and score != 0):
+            print(str(score/10)+"s")
             maxScore = score
         frameCounter = 0
         score = 0
