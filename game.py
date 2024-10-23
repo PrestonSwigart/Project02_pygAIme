@@ -73,7 +73,7 @@ iterations = 1
 maxScoreIterations = 1
 #run the game
 while Running:
-    state = agent.discretize_state(height, obs1[0], obs2[0], obs3[0])
+    state = agent.discretize_state(height, obs1[0]-100, obs2[0]-100, obs3[0]-100)
     #below handles game resets
 
     if crashed:
@@ -150,15 +150,17 @@ while Running:
                     3] - 10 <= obs2_cub[3] - 5) or \
                 (obs3_cub[0] <= player_stading_cub[2] - 10 <= obs3_cub[2] and obs3_cub[1] <= player_stading_cub[
                     3] - 10 <= obs3_cub[3] - 5):
-            reward = -1
+            reward = -10
             crashed = True
         else: #other things that don't involve object collision
             if height <= 100 and action == 1:
-                reward = -.5
+                reward = -.75
+            elif height <= 100 and action == 2:
+                reward = .75
             elif action == 1:
                 if 50 < obs1[0] - 100 < 200 or 50 < obs2[0] - 100 < 200 or 50 < obs3[0] - 100 < 200:
                     reward = 1
-                else: reward = -.5
+                else: reward = -.75
             elif running and not jumping:
                 if action == 2:
                     reward = -.2
