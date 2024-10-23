@@ -5,12 +5,9 @@ from PIL import Image
 import pygame
 from ai import QLearningAgent
 
-agent = QLearningAgent(state_size=1000000, action_size=3)  # Adjust state size as needed
-
+agent = QLearningAgent(state_size=1000000, action_size=3)
 pygame.init()
 speed = 16
-
-
 
 # extracting game items and characters from the resource.png image.
 player_init = Image.open("resources.png").crop((77,5,163,96)).convert("RGBA")
@@ -46,7 +43,6 @@ obstacle5 = obstacle5.resize(list(map(lambda x:x//2 , obstacle5.size)))
 obstacle6 = Image.open("resources.png").crop((851,2,950,101)).convert("RGBA")
 obstacle6 = obstacle6.resize(list(map(lambda x:x//2 , obstacle6.size)))
 
-
 cust_speed = 8
 running = cycle([player_frame_3]*cust_speed+[player_frame_31]*cust_speed)
 crouch = cycle([player_frame_5]*cust_speed+ [player_frame_6]*cust_speed)
@@ -73,9 +69,8 @@ iterations = 1
 maxScoreIterations = 1
 #run the game
 while Running:
-    state = agent.discretize_state(height, obs1[0]-100, obs2[0]-100, obs3[0]-100)
+    state = agent.discretize_state(height, obs1[0]-80, obs2[0]-80, obs3[0]-80)
     #below handles game resets
-
     if crashed:
         score = int(frameCounter / 3)
         if iterations - maxScoreIterations > 100:
@@ -153,21 +148,10 @@ while Running:
             reward = -10
             crashed = True
         else: #other things that don't involve object collision
-            if height <= 100 and action == 1:
-                reward = -.75
-            elif height <= 100 and action == 2:
-                reward = .75
-            elif action == 1:
-                if 50 < obs1[0] - 100 < 200 or 50 < obs2[0] - 100 < 200 or 50 < obs3[0] - 100 < 200:
-                    reward = 1
-                else: reward = -.75
-            elif running and not jumping:
-                if action == 2:
-                    reward = -.2
-                else:
-                    reward = .85
+            if action != 0:
+                reward = -.2
             else:
-                reward = .85
+                reward = 1
         agent.update(nstate, action, reward, next_state)
 
     gameDisplay.fill((255, 255, 255))
@@ -248,7 +232,6 @@ while Running:
             obs3 = (obs3[0], 115)
 
     player_stading_cub = (5, height, 5 + 43, height + 46)
-    #print(player_stading_cub)
     if height < 100:
         if not crashed:
             start = True
