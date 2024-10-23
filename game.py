@@ -52,7 +52,6 @@ running = cycle([player_frame_3]*cust_speed+[player_frame_31]*cust_speed)
 crouch = cycle([player_frame_5]*cust_speed+ [player_frame_6]*cust_speed)
 crouch_scope = [player_frame_5]+[player_frame_6]
 obstacles = [obstacle1,obstacle2, obstacle3,obstacle4,obstacle5,obstacle6]
-
 gameDisplay = pygame.display.set_mode((600, 200))
 pygame.display.set_caption('Dino Game')
 clock = pygame.time.Clock()
@@ -82,6 +81,7 @@ while Running:
         if iterations - maxScoreIterations > 100:
             maxScore = maxScore/2
             print("PB Threshold Lowered")
+            maxScoreIterations = iterations
         if iterations % 100 == 0:
             print(iterations)
         if score > maxScore and score != 0:
