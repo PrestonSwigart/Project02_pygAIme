@@ -8,7 +8,7 @@ from ai import QLearningAgent
 agent = QLearningAgent(state_size=1000000, action_size=3)  # Adjust state size as needed
 
 pygame.init()
-speed = 4
+speed = 16
 
 
 
@@ -63,8 +63,8 @@ frameCounter = 0
 maxScore = -1
 score = 0
 height = 110
-obs1 = (rnd(600, 600 + 500), 130)
-obs2 = (rnd(600 + 100 + 500, 1200 + 500), 130)
+obs1 = (rnd(600, 1100), 130)
+obs2 = (rnd(1200, 1700), 130)
 obs3 = (rnd(1700, 2000), 130)
 nstate = 0
 player = player_frame_1
@@ -76,8 +76,9 @@ maxScoreIterations = 1
 while Running:
     state = agent.discretize_state(height, obs1[0], obs2[0], obs3[0])
     #below handles game resets
-    score = int(frameCounter / 12)
+
     if crashed:
+        score = int(frameCounter / 3)
         if iterations - maxScoreIterations > 100:
             maxScore = maxScore/2
             print("PB Threshold Lowered")
@@ -85,7 +86,7 @@ while Running:
             print(iterations)
         if score > maxScore and score != 0:
             print("New PB! " + str(score / 10) + "s after " + str(iterations) + " iterations")
-            maxScore = score #max score = 21.3 rn
+            maxScore = score #max score = 21.3s rn
             maxScoreIterations = iterations
         iterations = iterations + 1
         reward = 0
@@ -106,8 +107,8 @@ while Running:
         c2 = (rnd(50, 600), rnd(0, 100))
         c3 = (rnd(30, 700), rnd(0, 100))
         c4 = (rnd(30, 600), rnd(0, 100))
-        obs1 = (rnd(600, 600 + 500), 130)
-        obs2 = (rnd(600 + 100 + 500, 1200 + 500), 130)
+        obs1 = (rnd(600, 1100), 130)
+        obs2 = (rnd(1200, 1700), 130)
         obs3 = (rnd(1700, 2000), 130)
         obast1 = choice(obstacles)
         if obast1 in [obstacle4, obstacle5, obstacle6]: obs1 = (obs1[0], 115)
@@ -117,10 +118,8 @@ while Running:
         if obast3 in [obstacle4, obstacle5, obstacle6]: obs3 = (obs3[0], 115)
         crashed = not crashed
         start = not start
-    else:
+    else: #if the game didnt reset
         action = agent.choose_action(state)
-
-        # Implement the action logic
         if action == 1 and height >= 110:
             jumping = True
             state = jumping
@@ -157,7 +156,7 @@ while Running:
             if height <= 100 and action == 1:
                 reward = -.5
             elif action == 1:
-                if obs1[0] - 100 < 200 or obs2[0] - 100 < 200 or obs3[0] - 100 < 200:
+                if 50 < obs1[0] - 100 < 200 or 50 < obs2[0] - 100 < 200 or 50 < obs3[0] - 100 < 200:
                     reward = 1
                 else: reward = -.5
             elif running and not jumping:
@@ -215,14 +214,14 @@ while Running:
     # Jumping and height management
     if jumping:
         if height >= 110 - 100:
-            height -= 4
+            height -= 16
         if height <= 110 - 100:
             jumping = False
     if height < 110 and not jumping:
         if slow_motion:
-            height += 1.5
+            height += 6
         else:
-            height += 3
+            height += 12
 
     player = gameDisplay.blit(pygame.image.fromstring(player.tobytes(), player.size, 'RGBA'), (5, height))
     gameDisplay.blit(pygame.image.fromstring(obast1.tobytes(), obast1.size, 'RGBA'), obs1)
@@ -286,5 +285,5 @@ while Running:
 
         pygame.display.update()
         #clock.tick(1) for testing purposes
-        clock.tick(120)
+        clock.tick(30)
         frameCounter += 1
