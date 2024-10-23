@@ -1,11 +1,11 @@
 from random import randrange as rnd
 from itertools import cycle
 from random import choice
-import PIL
 from PIL import Image
 import pygame
-import time
+from ai import QLearningAgent
 
+agent = QLearningAgent(state_size=1000000, action_size=3)  # Adjust state size as needed
 
 pygame.init()
 speed = 4
@@ -62,16 +62,36 @@ Running = True
 frameCounter = 0
 maxScore = -1
 score = 0
+height = 110
+obs1 = (rnd(600, 600 + 500), 130)
+obs2 = (rnd(600 + 100 + 500, 1200 + 500), 130)
+obs3 = (rnd(1700, 2000), 130)
+nstate = 0
+player = player_frame_1
+state = running
+jumping = False
+iterations = 1
+maxScoreIterations = 1
 #run the game
 while Running:
-    #this should reset the game
-    score = int(frameCounter/12)
-    if(crashed):
-        if(score > maxScore and score != 0):
-            print(str(score/10)+"s")
-            maxScore = score
+    state = agent.discretize_state(height, obs1[0], obs2[0], obs3[0])
+    #below handles game resets
+    score = int(frameCounter / 12)
+    if crashed:
+        if iterations - maxScoreIterations > 100:
+            maxScore = maxScore/2
+            print("PB Threshold Lowered")
+        if iterations % 100 == 0:
+            print(iterations)
+        if score > maxScore and score != 0:
+            print("New PB! " + str(score / 10) + "s after " + str(iterations) + " iterations")
+            maxScore = score #max score = 21.3 rn
+            maxScoreIterations = iterations
+        iterations = iterations + 1
+        reward = 0
         frameCounter = 0
         score = 0
+        nstate = 0
         state = player_frame_1
         lock = False
         bg = (0, 150)
@@ -79,6 +99,9 @@ while Running:
         height = 110
         jumping = False
         slow_motion = False
+        nstate = 0
+        player = player_frame_1
+        state = running
         c1 = (rnd(30, 600), rnd(0, 100))
         c2 = (rnd(50, 600), rnd(0, 100))
         c3 = (rnd(30, 700), rnd(0, 100))
@@ -94,16 +117,67 @@ while Running:
         if obast3 in [obstacle4, obstacle5, obstacle6]: obs3 = (obs3[0], 115)
         crashed = not crashed
         start = not start
+    else:
+        action = agent.choose_action(state)
 
-    gameDisplay.fill((255,255,255))
+        # Implement the action logic
+        if action == 1 and height >= 110:
+            jumping = True
+            state = jumping
+            player = player_frame_2
+            nstate = 1
+        elif action == 2:
+            slow_motion = True
+            state = crouch
+            player = player_frame_5
+            nstate = 2
+        else:
+            slow_motion = False
+            state = running
+            nstate = 0
+            player = next(running)
+
+        if isinstance(player, bool):
+            print("Player is unexpectedly a boolean!")
+            player = player_frame_1
+
+            # Update game state
+        next_state = agent.discretize_state(height, obs1[0], obs2[0], obs3[0])
+
+        #object collision
+        if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
+            obs1_cub[3] - 5) or \
+                (obs2_cub[0] <= player_stading_cub[2] - 10 <= obs2_cub[2] and obs2_cub[1] <= player_stading_cub[
+                    3] - 10 <= obs2_cub[3] - 5) or \
+                (obs3_cub[0] <= player_stading_cub[2] - 10 <= obs3_cub[2] and obs3_cub[1] <= player_stading_cub[
+                    3] - 10 <= obs3_cub[3] - 5):
+            reward = -1
+            crashed = True
+        else: #other things that don't involve object collision
+            if height <= 100 and action == 1:
+                reward = -.5
+            elif action == 1:
+                if obs1[0] - 100 < 200 or obs2[0] - 100 < 200 or obs3[0] - 100 < 200:
+                    reward = 1
+                else: reward = -.5
+            elif running and not jumping:
+                if action == 2:
+                    reward = -.2
+                else:
+                    reward = .85
+            else:
+                reward = .85
+        agent.update(nstate, action, reward, next_state)
+
+    gameDisplay.fill((255, 255, 255))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
             start = False
             Running = False
             print("crashed")
-        if event.type==pygame.KEYDOWN:
-            if(not crashed):
+        if event.type == pygame.KEYDOWN:
+            if not crashed:
                 start = True
             if event.key == pygame.K_DOWN:
                 slow_motion = True
@@ -111,91 +185,106 @@ while Running:
             if event.key == pygame.K_UP:
                 if height >= 110:
                     jumping = True
-        if event.type==pygame.KEYUP:
+        if event.type == pygame.KEYUP:
             slow_motion = False
             if event.key == pygame.K_DOWN:
                 state = running
 
-    player = state if type(state) != cycle else next(state)
     gameDisplay.blit(pygame.image.fromstring(cloud.tobytes(), cloud.size, 'RGBA'), c1)
     gameDisplay.blit(pygame.image.fromstring(cloud.tobytes(), cloud.size, 'RGBA'), c2)
     gameDisplay.blit(pygame.image.fromstring(cloud.tobytes(), cloud.size, 'RGBA'), c3)
     gameDisplay.blit(pygame.image.fromstring(cloud.tobytes(), cloud.size, 'RGBA'), c4)
-    c1 = (c1[0]-1, c1[1])
-    c2 = (c2[0]-1, c2[1])
-    c3 = (c3[0]-1, c3[1])
-    c4 = (c4[0]-1, c4[1])
-    if c1[0]<= -50:
+    c1 = (c1[0] - 1, c1[1])
+    c2 = (c2[0] - 1, c2[1])
+    c3 = (c3[0] - 1, c3[1])
+    c4 = (c4[0] - 1, c4[1])
+
+    # Reset clouds when they go off-screen
+    if c1[0] <= -50:
         c1 = (640, c1[1])
-    if c2[0]<= -50:
+    if c2[0] <= -50:
         c2 = (700, c2[1])
-    if c3[0]<= -50:
+    if c3[0] <= -50:
         c3 = (600, c3[1])
-    if c4[0]<= -50:
+    if c4[0] <= -50:
         c4 = (800, c4[1])
+
     gameDisplay.blit(pygame.image.fromstring(ground.tobytes(), ground.size, 'RGBA'), bg)
     gameDisplay.blit(pygame.image.fromstring(ground.tobytes(), ground.size, 'RGBA'), bg1)
+
+    # Jumping and height management
     if jumping:
-        if height>=110-100:
+        if height >= 110 - 100:
             height -= 4
-        if height <= 110-100:
+        if height <= 110 - 100:
             jumping = False
-    if height<110 and not jumping:
-        if slow_motion == True:
+    if height < 110 and not jumping:
+        if slow_motion:
             height += 1.5
-        else:height += 3
-    player = gameDisplay.blit(pygame.image.fromstring(player.tobytes(), player.size, 'RGBA'), (5,height))
+        else:
+            height += 3
+
+    player = gameDisplay.blit(pygame.image.fromstring(player.tobytes(), player.size, 'RGBA'), (5, height))
     gameDisplay.blit(pygame.image.fromstring(obast1.tobytes(), obast1.size, 'RGBA'), obs1)
     gameDisplay.blit(pygame.image.fromstring(obast2.tobytes(), obast2.size, 'RGBA'), obs2)
     gameDisplay.blit(pygame.image.fromstring(obast3.tobytes(), obast3.size, 'RGBA'), obs3)
-    if obs1[0]<=-50:
-        obs1 = (rnd(600, 600+500), 130)
+
+    # Handle obstacles going off-screen
+    if obs1[0] <= -50:
+        obs1 = (rnd(600, 600 + 500), 130)
         obast1 = choice(obstacles)
-        if obast1 in [obstacle4, obstacle5, obstacle6]:obs1 = (obs1[0], 115)
-    if obs2[0]<=-50:
-        obs2 = (rnd(600+100+500, 1200+500), 130)
+        if obast1 in [obstacle4, obstacle5, obstacle6]:
+            obs1 = (obs1[0], 115)
+    if obs2[0] <= -50:
+        obs2 = (rnd(600 + 100 + 500, 1200 + 500), 130)
         obast2 = choice(obstacles)
-        if obast2 in [obstacle4, obstacle5, obstacle6]:obs2 = (obs2[0], 115)
-    if obs3[0]<=-50:
+        if obast2 in [obstacle4, obstacle5, obstacle6]:
+            obs2 = (obs2[0], 115)
+    if obs3[0] <= -50:
         obs3 = (rnd(1700, 2000), 130)
         obast3 = choice(obstacles)
-        if obast3 in [obstacle4, obstacle5, obstacle6]:obs3 = (obs3[0], 115)
-    player_stading_cub = (5, height, 5+43,height+46)
-    if height< 100:
-        if(not crashed):
-            start=True
-    if start:
-        obs1 = (obs1[0]-speed, obs1[1])
-        obs2 = (obs2[0]-speed, obs2[1])
-        obs3 = (obs3[0]-speed, obs3[1])
-        obs1_cub = (obs1[0], obs1[1], obs1[0]+obast1.size[0],obs1[1]+obast1.size[1])
-        obs2_cub = (obs2[0], obs2[1], obs2[0]+obast2.size[0],obs2[1]+obast2.size[1])
-        obs3_cub = (obs3[0], obs3[1], obs3[0]+obast3.size[0],obs3[1]+obast3.size[1])
-        if not lock:
-            bg = (bg[0]-speed, bg[1])
-            if bg[0]<=-(600):
-                lock = 1
-        if -bg[0]>=600 and lock:
-            bg1 = (bg1[0]-speed, bg1[1])
-            bg = (bg[0]-speed, bg[1])
-            if -bg1[0]>=600:bg = (600,150)
-        if -bg1[0]>=600 and lock:
-            bg = (bg[0]-speed, bg1[1])
-            bg1 = (bg1[0]-speed, bg1[1])
-            if -bg[0]>=600:bg1 = (600,150)
+        if obast3 in [obstacle4, obstacle5, obstacle6]:
+            obs3 = (obs3[0], 115)
 
-        if obs1_cub[0]<=player_stading_cub[2]-10<=obs1_cub[2] and obs1_cub[1]<=player_stading_cub[3]-10<=obs1_cub[3]-5:
+    player_stading_cub = (5, height, 5 + 43, height + 46)
+    #print(player_stading_cub)
+    if height < 100:
+        if not crashed:
+            start = True
+
+    if start:
+        obs1 = (obs1[0] - speed, obs1[1])
+        obs2 = (obs2[0] - speed, obs2[1])
+        obs3 = (obs3[0] - speed, obs3[1])
+        obs1_cub = (obs1[0], obs1[1], obs1[0] + obast1.size[0], obs1[1] + obast1.size[1])
+        obs2_cub = (obs2[0], obs2[1], obs2[0] + obast2.size[0], obs2[1] + obast2.size[1])
+        obs3_cub = (obs3[0], obs3[1], obs3[0] + obast3.size[0], obs3[1] + obast3.size[1])
+
+        if not lock:
+            bg = (bg[0] - speed, bg[1])
+            if bg[0] <= -600:
+                lock = 1
+        if -bg[0] >= 600 and lock:
+            bg1 = (bg1[0] - speed, bg1[1])
+            bg = (bg[0] - speed, bg[1])
+            if -bg1[0] >= 600:
+                bg = (600, 150)
+        if -bg1[0] >= 600 and lock:
+            bg = (bg[0] - speed, bg1[1])
+            bg1 = (bg1[0] - speed, bg1[1])
+
+            # Check for collisions
+        if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
+            obs1_cub[3] - 5) or \
+                (obs2_cub[0] <= player_stading_cub[2] - 10 <= obs2_cub[2] and obs2_cub[1] <= player_stading_cub[
+                    3] - 10 <= obs2_cub[3] - 5) or \
+                (obs3_cub[0] <= player_stading_cub[2] - 10 <= obs3_cub[2] and obs3_cub[1] <= player_stading_cub[
+                    3] - 10 <= obs3_cub[3] - 5):
             start = False
             crashed = True
             state = player_frame_4
-        if obs2_cub[0]<=player_stading_cub[2]-10<=obs2_cub[2] and obs2_cub[1]<=player_stading_cub[3]-10<=obs2_cub[3]-5:
-            start = False
-            crashed = True
-            state = player_frame_4
-        if obs3_cub[0]<=player_stading_cub[2]-10<=obs3_cub[2] and obs3_cub[1]<=player_stading_cub[3]-10<=obs3_cub[3]-5:
-            start = False
-            crashed = True
-            state = player_frame_4
-    pygame.display.update()
-    clock.tick(120)
-    frameCounter += 1
+
+        pygame.display.update()
+        #clock.tick(1) for testing purposes
+        clock.tick(120)
+        frameCounter += 1
