@@ -147,11 +147,12 @@ while Running:
                     3] - 10 <= obs3_cub[3] - 5):
             reward = -10
             crashed = True
+            start = False
         else: #other things that don't involve object collision
-            if action != 0:
-                reward = -.2
-            else:
+            if action == 0:
                 reward = 1
+            else:
+                reward = -.2
         agent.update(nstate, action, reward, next_state)
 
     gameDisplay.fill((255, 255, 255))
@@ -258,15 +259,15 @@ while Running:
             bg1 = (bg1[0] - speed, bg1[1])
 
             # Check for collisions
-        if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
-            obs1_cub[3] - 5) or \
-                (obs2_cub[0] <= player_stading_cub[2] - 10 <= obs2_cub[2] and obs2_cub[1] <= player_stading_cub[
-                    3] - 10 <= obs2_cub[3] - 5) or \
-                (obs3_cub[0] <= player_stading_cub[2] - 10 <= obs3_cub[2] and obs3_cub[1] <= player_stading_cub[
-                    3] - 10 <= obs3_cub[3] - 5):
-            start = False
-            crashed = True
-            state = player_frame_4
+        #if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
+            #obs1_cub[3] - 5) or \
+                #(obs2_cub[0] <= player_stading_cub[2] - 10 <= obs2_cub[2] and obs2_cub[1] <= player_stading_cub[
+                    #3] - 10 <= obs2_cub[3] - 5) or \
+                #(obs3_cub[0] <= player_stading_cub[2] - 10 <= obs3_cub[2] and obs3_cub[1] <= player_stading_cub[
+                    #3] - 10 <= obs3_cub[3] - 5):
+            #start = False
+            #crashed = True
+            #state = player_frame_4
 
         pygame.display.update()
         #clock.tick(1) for testing purposes

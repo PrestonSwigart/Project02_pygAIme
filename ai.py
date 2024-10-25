@@ -14,7 +14,6 @@ class QLearningAgent:
         self.min_exploration_rate = 0.01
 
     def discretize_state(self, height, obs1_x, obs2_x, obs3_x):
-
         #if the nearest object is too close
         if max(0, min(obs1_x, obs2_x, obs3_x)) <= 0:
             if obs1_x <= 0 and obs2_x <= 0:
@@ -24,11 +23,11 @@ class QLearningAgent:
             elif obs1_x <= 0 and obs3_x <= 0:
                 return int(obs2_x)
             elif obs1_x <= 0:
-                return int(min(obs2_x, obs3_x))
+                return int(max(0, min(obs2_x, obs3_x)))
             elif obs2_x <= 0:
-                return int(min(obs1_x, obs3_x))
+                return int(max(0, min(obs1_x, obs3_x)))
             elif obs3_x <= 0:
-                return int(min(obs1_x, obs2_x))
+                return int(max(0, min(obs1_x, obs2_x)))
             else:
                 return 0
         else:
