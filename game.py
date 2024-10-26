@@ -65,7 +65,7 @@ nstate = 0
 player = player_frame_1
 state = running
 jumping = False
-iterations = 1
+iterations = 0
 maxScoreIterations = 1
 #run the game
 while Running:
@@ -77,7 +77,7 @@ while Running:
             maxScore = maxScore/2
             print("PB Threshold Lowered")
             maxScoreIterations = iterations
-        if iterations % 100 == 0:
+        if iterations % 100 == 0 and iterations != 0:
             print(iterations)
         if score > maxScore and score != 0:
             print("New PB! " + str(score / 10) + "s after " + str(iterations) + " iterations")
@@ -137,7 +137,6 @@ while Running:
 
             # Update game state
         next_state = agent.discretize_state(height, obs1[0], obs2[0], obs3[0])
-
         #object collision
         if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
             obs1_cub[3] - 5) or \
@@ -145,15 +144,18 @@ while Running:
                     3] - 10 <= obs2_cub[3] - 5) or \
                 (obs3_cub[0] <= player_stading_cub[2] - 10 <= obs3_cub[2] and obs3_cub[1] <= player_stading_cub[
                     3] - 10 <= obs3_cub[3] - 5):
-            reward = -10
+            reward = -1
             crashed = True
             start = False
         else: #other things that don't involve object collision
-            if action == 0:
+            if action == 1 and height >= 100 and 50 < next_state < 150:
                 reward = 1
+           # elif action == 1 and height <= 100:
+            #    reward = .5
             else:
-                reward = -.2
+                reward = 0
         agent.update(nstate, action, reward, next_state)
+
 
     gameDisplay.fill((255, 255, 255))
     for event in pygame.event.get():

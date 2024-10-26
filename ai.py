@@ -10,18 +10,18 @@ class QLearningAgent:
         self.learning_rate = 0.1
         self.discount_factor = 0.95
         self.exploration_rate = 1.0
-        self.exploration_decay = 0.995
+        self.exploration_decay = 0.9995
         self.min_exploration_rate = 0.01
 
     def discretize_state(self, height, obs1_x, obs2_x, obs3_x):
         #if the nearest object is too close
         if max(0, min(obs1_x, obs2_x, obs3_x)) <= 0:
             if obs1_x <= 0 and obs2_x <= 0:
-                return int(obs3_x)
+                return max(0, int(obs3_x))
             elif obs2_x <= 0 and obs3_x <= 0:
-                return int(obs1_x)
+                return max(0, int(obs1_x))
             elif obs1_x <= 0 and obs3_x <= 0:
-                return int(obs2_x)
+                return max(0, int(obs2_x))
             elif obs1_x <= 0:
                 return int(max(0, min(obs2_x, obs3_x)))
             elif obs2_x <= 0:
@@ -34,6 +34,7 @@ class QLearningAgent:
             return min(obs1_x, obs2_x, obs3_x)
 
     def choose_action(self, state):
+        self.exploration_rate = self.exploration_rate * self.exploration_decay
         if random.uniform(0, 1) < self.exploration_rate:
             return random.randint(0, self.action_size - 1)  # Explore
         else:
