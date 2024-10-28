@@ -69,7 +69,7 @@ iterations = 0
 maxScoreIterations = 1
 #run the game
 while Running:
-    state = agent.discretize_state(height, obs1[0]-80, obs2[0]-80, obs3[0]-80)
+    statepos = agent.discretize_state(height, obs1[0]-80, obs2[0]-80, obs3[0]-80)
     #below handles game resets
     if crashed:
         score = int(frameCounter / 3)
@@ -85,6 +85,7 @@ while Running:
             maxScoreIterations = iterations
         iterations = iterations + 1
         reward = 0
+        statepos = 0
         frameCounter = 0
         score = 0
         nstate = 0
@@ -114,7 +115,7 @@ while Running:
         crashed = not crashed
         start = not start
     else: #if the game didnt reset
-        action = agent.choose_action(state)
+        action = agent.choose_action(statepos)
         if action == 1 and height >= 110: #making sure it cant jump midair
             jumping = True
             state = jumping
@@ -137,7 +138,7 @@ while Running:
 
             # Update game state
         next_state = agent.discretize_state(height, obs1[0], obs2[0], obs3[0])
-        #object collision
+        #object collision and reward system
         if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
             obs1_cub[3] - 5) or \
                 (obs2_cub[0] <= player_stading_cub[2] - 10 <= obs2_cub[2] and obs2_cub[1] <= player_stading_cub[
