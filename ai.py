@@ -10,28 +10,28 @@ class QLearningAgent:
         self.learning_rate = 0.1
         self.discount_factor = 0.95
         self.exploration_rate = 1.0
-        self.exploration_decay = 0.9995
+        self.exploration_decay = 0.999
         self.min_exploration_rate = 0.01
 
     def discretize_state(self, height, obs1_x, obs2_x, obs3_x):
         #if the nearest object is too close
         if max(0, min(obs1_x, obs2_x, obs3_x)) <= 0:
             if obs1_x <= 0 and obs2_x <= 0:
-                return max(0, int(obs3_x))
+                return max(0, int(obs3_x)) - ((max(0, int(obs3_x)))%5)
             elif obs2_x <= 0 and obs3_x <= 0:
-                return max(0, int(obs1_x))
+                return max(0, int(obs1_x)) - ((max(0, int(obs1_x)))%5)
             elif obs1_x <= 0 and obs3_x <= 0:
-                return max(0, int(obs2_x))
+                return max(0, int(obs2_x)) - ((max(0, int(obs2_x)))%5)
             elif obs1_x <= 0:
-                return int(max(0, min(obs2_x, obs3_x)))
+                return int(max(0, min(obs2_x, obs3_x))) - ((int(max(0, min(obs2_x, obs3_x))))%5)
             elif obs2_x <= 0:
-                return int(max(0, min(obs1_x, obs3_x)))
+                return int(max(0, min(obs1_x, obs3_x))) - ((int(max(0, min(obs1_x, obs3_x))))%5)
             elif obs3_x <= 0:
-                return int(max(0, min(obs1_x, obs2_x)))
+                return int(max(0, min(obs1_x, obs2_x))) - ((int(max(0, min(obs1_x, obs2_x))))%5)
             else:
                 return 0
         else:
-            return min(obs1_x, obs2_x, obs3_x)
+            return min(obs1_x, obs2_x, obs3_x) - min(obs1_x, obs2_x, obs3_x)%5
 
     def choose_action(self, state):
         self.exploration_rate = self.exploration_rate * self.exploration_decay
@@ -45,7 +45,7 @@ class QLearningAgent:
         state_index = int(state)
         next_state_index = int(next_state)
 
-        # Ensure the indices are within bounds
+        # Ensure the indices are within bounds (thanks chatgpt)
         if state_index < 0 or state_index >= self.q_table.shape[0]:
             raise IndexError(f"State index out of bounds: {state_index}")
         if next_state_index < 0 or next_state_index >= self.q_table.shape[0]:

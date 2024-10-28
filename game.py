@@ -5,7 +5,7 @@ from PIL import Image
 import pygame
 from ai import QLearningAgent
 
-agent = QLearningAgent(state_size=1000000, action_size=3)
+agent = QLearningAgent(state_size=2500, action_size=3)
 pygame.init()
 speed = 16
 
@@ -115,7 +115,7 @@ while Running:
         start = not start
     else: #if the game didnt reset
         action = agent.choose_action(state)
-        if action == 1 and height >= 110:
+        if action == 1 and height >= 110: #making sure it cant jump midair
             jumping = True
             state = jumping
             player = player_frame_2
@@ -144,14 +144,18 @@ while Running:
                     3] - 10 <= obs2_cub[3] - 5) or \
                 (obs3_cub[0] <= player_stading_cub[2] - 10 <= obs3_cub[2] and obs3_cub[1] <= player_stading_cub[
                     3] - 10 <= obs3_cub[3] - 5):
-            reward = -1
+            reward = -10
             crashed = True
             start = False
         else: #other things that don't involve object collision
-            if action == 1 and height >= 100 and 50 < next_state < 150:
+            if action == 1 and height >= 100 and 75 < next_state < 125:
                 reward = 1
            # elif action == 1 and height <= 100:
             #    reward = .5
+            elif action == 0 and jumping and 25 < next_state < 100:
+                reward = .5
+            elif height <= 100 and action == 2:
+                reward = .2
             else:
                 reward = 0
         agent.update(nstate, action, reward, next_state)
@@ -260,7 +264,7 @@ while Running:
             bg = (bg[0] - speed, bg1[1])
             bg1 = (bg1[0] - speed, bg1[1])
 
-            # Check for collisions
+            # Check for collisions THIS IS NOW HANDLED BY THE AI ITSELF AND NOT HERE BY THE GAME
         #if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
             #obs1_cub[3] - 5) or \
                 #(obs2_cub[0] <= player_stading_cub[2] - 10 <= obs2_cub[2] and obs2_cub[1] <= player_stading_cub[
@@ -273,5 +277,5 @@ while Running:
 
         pygame.display.update()
         #clock.tick(1) for testing purposes
-        clock.tick(30)
-        frameCounter += 1
+        clock.tick(30) #30fps for purposes of trying to give AI less choices for simplicity
+        frameCounter += 1 #framecounter is my method of determining lifespan
