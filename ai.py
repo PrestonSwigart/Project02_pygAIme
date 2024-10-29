@@ -10,7 +10,7 @@ class QLearningAgent:
         self.learning_rate = 0.1
         self.discount_factor = 0.95
         self.exploration_rate = 1.0
-        self.exploration_decay = 0.9995
+        self.exploration_decay = 0.995
         self.min_exploration_rate = 0.01
 
     def discretize_state(self, height, obs1_x, obs2_x, obs3_x):

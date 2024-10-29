@@ -151,15 +151,13 @@ while Running:
         else: #other things that don't involve object collision
             if action == 1 and height >= 100 and 75 < next_state < 125:
                 reward = 1
-           # elif action == 1 and height <= 100:
-            #    reward = .5
             elif action == 0 and jumping and 25 < next_state < 100:
                 reward = .5
-            elif height <= 100 and action == 2:
-                reward = .2
+            elif action == 1 and next_state > 125:
+                reward = -.5
             else:
                 reward = 0
-        agent.update(nstate, action, reward, next_state)
+        agent.update(statepos, action, reward, next_state)
 
 
     gameDisplay.fill((255, 255, 255))
