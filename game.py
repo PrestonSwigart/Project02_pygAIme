@@ -79,7 +79,7 @@ while Running:
             print("New PB! " + str(score / 10) + "s after " + str(iterations) + " iterations")
             maxScore = score #max score = 20.8 seconds currently
             maxScoreIterations = iterations
-        elif score > ((maxScore * 3)/4) and iterations > 100:
+        elif score > ((maxScore * 3)/4) and iterations > 100 and score > 75:
             print("Good Run! " + str(score / 10) + "s after " + str(iterations) + " iterations")
         iterations = iterations + 1
         reward = 0
