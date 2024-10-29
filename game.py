@@ -152,7 +152,7 @@ while Running:
             elif action == 0 and jumping and 25 < next_state < 100:
                 reward = .5
             elif action == 1 and next_state > 125:
-                reward = -.5
+                reward = -.8
             elif action == 2 and height >= 100:
                 reward = -.2
             else:
