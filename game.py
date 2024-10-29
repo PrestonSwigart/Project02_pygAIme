@@ -73,16 +73,14 @@ while Running:
     #below handles game resets
     if crashed:
         score = int(frameCounter / 3)
-        if iterations - maxScoreIterations > 100:
-            maxScore = maxScore/2
-            print("PB Threshold Lowered")
-            maxScoreIterations = iterations
         if iterations % 100 == 0 and iterations != 0:
             print(iterations)
         if score > maxScore and score != 0:
             print("New PB! " + str(score / 10) + "s after " + str(iterations) + " iterations")
             maxScore = score #max score = 21.3s rn
             maxScoreIterations = iterations
+        elif score > ((maxScore * 3)/4) and iterations > 100:
+            print("Good Run! " + str(score / 10) + "s after " + str(iterations) + " iterations")
         iterations = iterations + 1
         reward = 0
         statepos = 0
@@ -155,6 +153,8 @@ while Running:
                 reward = .5
             elif action == 1 and next_state > 125:
                 reward = -.5
+            elif action == 2 and height >= 100:
+                reward = -.2
             else:
                 reward = 0
         agent.update(statepos, action, reward, next_state)
