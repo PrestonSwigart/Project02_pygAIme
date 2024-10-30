@@ -10,8 +10,22 @@ class QLearningAgent:
         self.learning_rate = 0.1
         self.discount_factor = 0.95
         self.exploration_rate = 1.0
-        self.exploration_decay = 0.999
-        self.min_exploration_rate = 0.01
+        self.exploration_decay = 0.99975
+        self.min_exploration_rate = 0.1
+
+    def get_next_action(self, state1, state2, state3, epsilon):
+        # if a randomly chosen value between 0 and 1 is less than epsilon,
+        # then choose the most promising value from the Q-table for this state.
+        if np.random.random() < epsilon:
+            return np.argmax(self.q_table[state1, state2, state3])
+        else:  # choose a random action
+            return np.random.randint(3)
+
+
+
+
+
+
 
     def discretize_state(self, height, obs1_x, obs2_x, obs3_x):
         #if the nearest object is too close

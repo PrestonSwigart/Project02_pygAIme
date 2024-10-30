@@ -1,11 +1,13 @@
 from random import randrange as rnd
 from itertools import cycle
 from random import choice
+
+import numpy as np
 from PIL import Image
 import pygame
 from ai import QLearningAgent
 
-agent = QLearningAgent(state_size=2500, action_size=3)
+agent = QLearningAgent(25000, 3)
 pygame.init()
 speed = 16
 
@@ -77,7 +79,7 @@ while Running:
             print(iterations)
         if score > maxScore and score != 0:
             print("New PB! " + str(score / 10) + "s after " + str(iterations) + " iterations")
-            maxScore = score #max score = 26.4 seconds currently
+            maxScore = score #max score = 27.6 seconds currently
             maxScoreIterations = iterations
         elif score > (maxScore/2) and iterations > 100 and score > 100:
             print("Good Run! " + str(score / 10) + "s after " + str(iterations) + " iterations")
