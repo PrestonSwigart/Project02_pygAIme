@@ -1,13 +1,11 @@
 from random import randrange as rnd
 from itertools import cycle
 from random import choice
-
-import numpy as np
 from PIL import Image
 import pygame
-from ai import QLearningAgent
+from ai2 import QLearningAgent
 
-agent = QLearningAgent()
+agent = QLearningAgent(state_size=2500, action_size=3)
 pygame.init()
 speed = 16
 
@@ -69,9 +67,9 @@ state = running
 jumping = False
 iterations = 0
 maxScoreIterations = 1
-statepos = [obs1[0], obs2[0], obs3[0]]
 #run the game
 while Running:
+    statepos = agent.discretize_state(height, obs1[0]-80, obs2[0]-80, obs3[0]-80)
     #below handles game resets
     if crashed:
         score = int(frameCounter / 3)
@@ -79,13 +77,13 @@ while Running:
             print(iterations)
         if score > maxScore and score != 0:
             print("New PB! " + str(score / 10) + "s after " + str(iterations) + " iterations")
-            maxScore = score #max score = 27.6 seconds currently
+            maxScore = score #max score = 26.4 seconds currently
             maxScoreIterations = iterations
-        elif score > (maxScore/2) and iterations > 100 and score > 80:
+        elif score > (maxScore/2) and iterations > 100 and score > 100:
             print("Good Run! " + str(score / 10) + "s after " + str(iterations) + " iterations")
         iterations = iterations + 1
         reward = 0
-        statepos = [obs1[0], obs2[0], obs3[0]]
+        statepos = 0
         frameCounter = 0
         score = 0
         nstate = 0
@@ -115,7 +113,7 @@ while Running:
         crashed = not crashed
         start = not start
     else: #if the game didnt reset
-        action = agent.get_next_action(statepos[0], statepos[1], statepos[2])
+        action = agent.choose_action(statepos)
         if action == 1 and height >= 110: #making sure it cant jump midair
             jumping = True
             state = jumping
@@ -132,9 +130,12 @@ while Running:
             nstate = 0
             player = next(running)
 
+        if isinstance(player, bool):
+            print("Player is unexpectedly a boolean!")
+            player = player_frame_1
 
             # Update game state
-        next_state = [obs1[0], obs2[0], obs3[0]]
+        next_state = agent.discretize_state(height, obs1[0], obs2[0], obs3[0])
         #object collision and reward system
         if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
             obs1_cub[3] - 5) or \
@@ -146,12 +147,11 @@ while Running:
             crashed = True
             start = False
         else: #other things that don't involve object collision
-            closestObj = agent.nearestObject(obs1[0]-80, obs2[0]-80, obs3[0]-80)
-            if action == 1 and height >= 100 and 75 < closestObj < 125:
+            if action == 1 and height >= 100 and 75 < next_state < 125:
                 reward = 1
-            elif action == 0 and jumping and 25 < closestObj < 100:
+            elif action == 0 and jumping and 25 < next_state < 100:
                 reward = .5
-            elif action == 1 and closestObj > 125:
+            elif action == 1 and next_state > 125:
                 reward = -.8
             elif action == 2 and height >= 100:
                 reward = -.2
