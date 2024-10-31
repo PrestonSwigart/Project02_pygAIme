@@ -1,5 +1,4 @@
 import numpy as np
-import random
 
 
 class QLearningAgent:
@@ -10,13 +9,14 @@ class QLearningAgent:
         self.learning_rate = 0.9
         self.discount_factor = 0.9
 
+    #yeah
     def get_next_action(self, state1, state2, state3):
         # if a randomly chosen value between 0 and 1 is less than epsilon,
-        # then choose the most promising value from the Q-table for this state.
+        # then choose the most promising value from the Q-table for this state. (thanks random website)
         self.epsilon *= self.exploration_decay
         if np.random.random() > self.epsilon:
             return np.argmax(self.q_table[state1, state2, state3])
-        else:  # choose a random action
+        else:
             return np.random.randint(3)
 
 
