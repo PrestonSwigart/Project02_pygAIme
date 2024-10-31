@@ -74,7 +74,7 @@ statepos = [obs1[0], obs2[0], obs3[0]]
 while Running:
     #below handles game resets
     if crashed:
-        score = int(frameCounter / 6)
+        score = int(frameCounter / 3)
         if iterations % 100 == 0 and iterations != 0:
             print(iterations)
         if score > maxScore and score != 0:
