@@ -27,7 +27,7 @@ class QLearningAgent:
         # then choose the most promising value from the Q-table for this state. (thanks random website)
         self.epsilon *= self.exploration_decay
         if np.random.random() > self.epsilon:
-            return np.argmax(self.q_table[state1, state2, state3])
+            return np.argmax(self.q_table[self.nearestObject(state1, state2, state3)])
         else:
             return np.random.randint(3)
 
@@ -55,6 +55,6 @@ class QLearningAgent:
 
     #update AI
     def update(self, state, action, reward, next_state):
-        best_next_action = np.argmax(self.q_table[simpleState(next_state)])
-        target = reward + self.discount_factor * self.q_table[simpleState(next_state)][best_next_action]
-        self.q_table[simpleState(state)][action] += (self.learning_rate * (target - self.q_table[simpleState(state)][action]))
+        best_next_action = np.argmax(self.q_table[self.nearestObject(next_state[0], next_state[1], next_state[2])])
+        target = reward + self.discount_factor * self.q_table[self.nearestObject(next_state[0], next_state[1], next_state[2])][best_next_action]
+        self.q_table[self.nearestObject(state[0], state[1], state[2])][action] += (self.learning_rate * (target - self.q_table[self.nearestObject(state[0], state[1], state[2])][action]))

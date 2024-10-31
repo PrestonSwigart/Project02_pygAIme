@@ -276,5 +276,5 @@ while Running:
 
         pygame.display.update()
         #clock.tick(1) for testing purposes
-        clock.tick(60) #30fps for purposes of trying to give AI less choices for simplicity
+        clock.tick(30) #30fps for purposes of trying to give AI less choices for simplicity
         frameCounter += 1 #framecounter is my method of determining lifespan
