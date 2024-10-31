@@ -71,7 +71,7 @@ iterations = 0
 maxScoreIterations = 1
 #run the game
 while Running:
-    statepos = agent.discretize_state(height, obs1[0]-80, obs2[0]-80, obs3[0]-80)
+    statepos = [obs1[0], obs2[0], obs3[0]]
     #below handles game resets
     if crashed:
         score = int(frameCounter / 3)
@@ -85,7 +85,7 @@ while Running:
             print("Good Run! " + str(score / 10) + "s after " + str(iterations) + " iterations")
         iterations = iterations + 1
         reward = 0
-        statepos = 0
+        statepos = [obs1,obs2,obs3]
         frameCounter = 0
         score = 0
         nstate = 0
@@ -115,7 +115,7 @@ while Running:
         crashed = not crashed
         start = not start
     else: #if the game didnt reset
-        action = agent.choose_action(statepos)
+        action = agent.get_next_action(statepos[0], statepos[1], statepos[2])
         if action == 1 and height >= 110: #making sure it cant jump midair
             jumping = True
             state = jumping
@@ -137,7 +137,7 @@ while Running:
             player = player_frame_1
 
             # Update game state
-        next_state = agent.discretize_state(height, obs1[0], obs2[0], obs3[0])
+        next_state = [obs1[0], obs2[0], obs3[0]]
         #object collision and reward system
         if (obs1_cub[0] <= player_stading_cub[2] - 10 <= obs1_cub[2] and obs1_cub[1] <= player_stading_cub[3] - 10 <=
             obs1_cub[3] - 5) or \
@@ -149,11 +149,12 @@ while Running:
             crashed = True
             start = False
         else: #other things that don't involve object collision
-            if action == 1 and height >= 100 and 75 < next_state < 125:
+            closestObj = agent.nearestObject(obs1[0], obs2[0], obs3[0])
+            if action == 1 and height >= 100 and 75 < closestObj < 125:
                 reward = 1
-            elif action == 0 and jumping and 25 < next_state < 100:
+            elif action == 0 and jumping and 25 < closestObj < 100:
                 reward = .5
-            elif action == 1 and next_state > 125:
+            elif action == 1 and closestObj > 125:
                 reward = -.8
             elif action == 2 and height >= 100:
                 reward = -.2
