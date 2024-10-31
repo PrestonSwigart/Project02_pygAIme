@@ -7,7 +7,7 @@ from PIL import Image
 import pygame
 from ai import QLearningAgent
 
-agent = QLearningAgent(25000, 3)
+agent = QLearningAgent()
 pygame.init()
 speed = 16
 

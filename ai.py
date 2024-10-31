@@ -19,9 +19,11 @@ class QLearningAgent:
         else:  # choose a random action
             return np.random.randint(3)
 
+
+    #bad method that returns the closest object that isnt behind
     def nearestObject(self, obs1_x, obs2_x, obs3_x):
         # if the nearest object is too close
-        if max(0, min(obs1_x, obs2_x, obs3_x)) <= 0:
+        if max(0, min(obs1_x, obs2_x, obs3_x)) == 0:
             if obs1_x <= 0 and obs2_x <= 0:
                 return max(0, int(obs3_x)) - ((max(0, int(obs3_x))) % 5)
             elif obs2_x <= 0 and obs3_x <= 0:
@@ -39,9 +41,8 @@ class QLearningAgent:
         else:
             return min(obs1_x, obs2_x, obs3_x) - min(obs1_x, obs2_x, obs3_x) % 5
 
-
+    #update AI
     def update(self, state, action, reward, next_state):
-        # Perform Q-learning update
         best_next_action = np.argmax(self.q_table[next_state])
         target = reward + self.discount_factor * self.q_table[next_state][best_next_action]
         self.q_table[state][action] += self.learning_rate * (target - self.q_table[state][action])
