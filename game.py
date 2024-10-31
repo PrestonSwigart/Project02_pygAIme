@@ -69,12 +69,12 @@ state = running
 jumping = False
 iterations = 0
 maxScoreIterations = 1
+statepos = [obs1[0], obs2[0], obs3[0]]
 #run the game
 while Running:
-    statepos = [obs1[0], obs2[0], obs3[0]]
     #below handles game resets
     if crashed:
-        score = int(frameCounter / 3)
+        score = int(frameCounter / 6)
         if iterations % 100 == 0 and iterations != 0:
             print(iterations)
         if score > maxScore and score != 0:
@@ -85,7 +85,7 @@ while Running:
             print("Good Run! " + str(score / 10) + "s after " + str(iterations) + " iterations")
         iterations = iterations + 1
         reward = 0
-        statepos = [obs1,obs2,obs3]
+        statepos = [obs1[0], obs2[0], obs3[0]]
         frameCounter = 0
         score = 0
         nstate = 0
@@ -132,9 +132,6 @@ while Running:
             nstate = 0
             player = next(running)
 
-        if isinstance(player, bool):
-            print("Player is unexpectedly a boolean!")
-            player = player_frame_1
 
             # Update game state
         next_state = [obs1[0], obs2[0], obs3[0]]
@@ -149,7 +146,7 @@ while Running:
             crashed = True
             start = False
         else: #other things that don't involve object collision
-            closestObj = agent.nearestObject(obs1[0], obs2[0], obs3[0])
+            closestObj = agent.nearestObject(obs1[0]-80, obs2[0]-80, obs3[0]-80)
             if action == 1 and height >= 100 and 75 < closestObj < 125:
                 reward = 1
             elif action == 0 and jumping and 25 < closestObj < 100:
@@ -279,5 +276,5 @@ while Running:
 
         pygame.display.update()
         #clock.tick(1) for testing purposes
-        clock.tick(30) #30fps for purposes of trying to give AI less choices for simplicity
+        clock.tick(60) #30fps for purposes of trying to give AI less choices for simplicity
         frameCounter += 1 #framecounter is my method of determining lifespan

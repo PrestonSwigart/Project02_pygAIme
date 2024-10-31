@@ -1,9 +1,21 @@
 import numpy as np
 
 
+def simpleState(currentState):
+    if currentState[0] < currentState[2] and currentState[1] < currentState[2]:
+        newState = [currentState[0], currentState[1]]
+        return newState
+    elif currentState[1] < currentState[0] and currentState[2] < currentState[0]:
+        newState = [currentState[1], currentState[2]]
+        return newState
+    else:
+        newState = [currentState[0], currentState[2]]
+        return newState
+
+
 class QLearningAgent:
-    def __init__(self):
-        self.q_table = np.zeros(([2000, 2000, 2000]))
+    def __init__(self, state_size=2000, action_size=3):
+        self.q_table = np.zeros((state_size, action_size))
         self.exploration_decay = 0.99975
         self.epsilon = 1
         self.learning_rate = 0.9
@@ -43,6 +55,6 @@ class QLearningAgent:
 
     #update AI
     def update(self, state, action, reward, next_state):
-        best_next_action = np.argmax(self.q_table[next_state])
-        target = reward + self.discount_factor * self.q_table[next_state][best_next_action]
-        self.q_table[state][action] += self.learning_rate * (target - self.q_table[state][action])
+        best_next_action = np.argmax(self.q_table[simpleState(next_state)])
+        target = reward + self.discount_factor * self.q_table[simpleState(next_state)][best_next_action]
+        self.q_table[simpleState(state)][action] += (self.learning_rate * (target - self.q_table[simpleState(state)][action]))
