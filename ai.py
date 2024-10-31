@@ -1,18 +1,6 @@
 import numpy as np
 
 
-def simpleState(currentState):
-    if currentState[0] < currentState[2] and currentState[1] < currentState[2]:
-        newState = [currentState[0], currentState[1]]
-        return newState
-    elif currentState[1] < currentState[0] and currentState[2] < currentState[0]:
-        newState = [currentState[1], currentState[2]]
-        return newState
-    else:
-        newState = [currentState[0], currentState[2]]
-        return newState
-
-
 class QLearningAgent:
     def __init__(self, state_size=2000, action_size=3):
         self.q_table = np.zeros((state_size, action_size))
